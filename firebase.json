@@ -1,0 +1,36 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "snailpace-ai",
+          "appId": "1:669902647783:android:26bffe2d20a3ec068f4d42",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "snailpace-ai",
+          "configurations": {
+            "android": "1:669902647783:android:26bffe2d20a3ec068f4d42",
+            "web": "1:669902647783:web:12c49a95da4743748f4d42"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
