@@ -15,7 +15,7 @@ var topics = [
     'Pre Trained Foundation Models',
     'Prompt Engineering',
     'Prompting Frameworks',
-    'RISE Framework',
+    'RISE Prompting Framework',
     'Prompts',
     'Completions',
     'Context Window',

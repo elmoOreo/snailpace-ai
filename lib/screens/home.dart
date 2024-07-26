@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:snailpace/widgets/custom_dialog.dart';
+import 'package:snailpace/widgets/custom_drawer.dart';
 import 'package:snailpace/widgets/nuggets.dart';
 import 'package:snailpace/data/topic_data.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:snailpace/widgets/custom_dropdown_filter.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'package:snailpace/widgets/quiz_nuggets.dart';
@@ -85,6 +84,12 @@ class _HomeState extends State<Home> {
     verboseSelected = verboseList[1];
   }
 
+  void refreshTopic() {
+    setState(() {
+      _currentItem = "nugget";
+    });
+  }
+
   void getTheNextTopic() {
     //_currentSelectionToShow = randomizer.nextInt(3);
 
@@ -111,17 +116,7 @@ class _HomeState extends State<Home> {
   }
 
   void getThePreviousTopic() {
-    //_currentSelectionToShow = randomizer.nextInt(3);
-
     _currentSelectionToShow = 0;
-
-/*     if (_currentSelectionToShow == 0) {
-      _currentSelectionToShow = 1;
-    } else if (_currentSelectionToShow == 1) {
-      _currentSelectionToShow = 2;
-    } else {
-      _currentSelectionToShow = 0;
-    } */
 
     setState(() {
       if (_currentSelectionToShow == 0) {
@@ -168,17 +163,70 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void eventOnSelectedAnswer(question, choosenAnswer, correctAnswer) {
+  void eventOnSelectedAnswer(
+      question, choosenAnswer, correctAnswer, reasoningForTheAnswer) {
     showDialog<String>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) => AlertDialog(
-        backgroundColor: Colors.deepOrange[300],
+        backgroundColor: choosenAnswer == correctAnswer
+            ? Colors.greenAccent[100]
+            : Colors.deepOrange[100],
+        insetPadding: const EdgeInsets.all(1),
         title: const Text('Quiz Result'),
-        content: CustomDialog(
-            question: question,
-            choosenAnswer: choosenAnswer,
-            correctAnswer: correctAnswer),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              ColoredBox(
+                color: Colors.lightBlueAccent,
+                child: Text(
+                  'Question : $question',
+                  textAlign: TextAlign.left,
+                  style: const TextStyle(fontSize: 20),
+                ),
+              ),
+              const Divider(
+                height: 10,
+                thickness: 2,
+                indent: 0,
+                endIndent: 0,
+                color: Colors.black,
+              ),
+              Text(
+                'Choosen Answer : $choosenAnswer',
+                textAlign: TextAlign.left,
+                style: const TextStyle(fontSize: 20),
+              ),
+              const Divider(
+                height: 10,
+                thickness: 2,
+                indent: 0,
+                endIndent: 0,
+                color: Colors.black,
+              ),
+              Text(
+                'Correct Answer : $correctAnswer',
+                textAlign: TextAlign.left,
+                style: const TextStyle(fontSize: 20),
+              ),
+              const Divider(
+                height: 10,
+                thickness: 2,
+                indent: 0,
+                endIndent: 0,
+                color: Colors.black,
+              ),
+              ColoredBox(
+                color: Colors.lightGreenAccent,
+                child: Text(
+                  'Reasoning for the Answer : $reasoningForTheAnswer',
+                  textAlign: TextAlign.left,
+                  style: const TextStyle(fontSize: 20),
+                ),
+              )
+            ],
+          ),
+        ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context, 'Cancel'),
@@ -211,6 +259,7 @@ class _HomeState extends State<Home> {
     var response;
     var content;
     var dataString;
+    var randomTopicNumber;
 
     final userData = await FirebaseFirestore.instance
         .collection('userProgressData')
@@ -224,7 +273,11 @@ class _HomeState extends State<Home> {
       _currentNuggetItem = 0;
     }
 
-    final randomTopicNumber = randomizer.nextInt(_currentNuggetItem);
+    if (_currentNuggetItem > 2) {
+      randomTopicNumber = randomizer.nextInt(_currentNuggetItem);
+    } else {
+      randomTopicNumber = 0;
+    }
 
     final model = GenerativeModel(
         model: 'gemini-1.5-flash',
@@ -243,12 +296,14 @@ class _HomeState extends State<Home> {
         Step 2) List the answer having a maximum length of no more than 2 words to the question in Step 1.
         Step 3) Generate 3 other similar answers having a maximum length of no more than 2 words as in Step 2. 
         Step 4) Return the answers generated in Step 2 and Step 3 as a single list.
+        Step 5) Articulate in detail why the answer in Step 2 is the right answer for the question in Step 1
 
         Return the results in the format below and ensure JSON is valid. 
           "{
             "Question": str
             "Answer": str
             "AllOptions":[]
+            "Reasoning": str
           }"
     ''';
 
@@ -340,6 +395,24 @@ class _HomeState extends State<Home> {
     var dataString;
     var jsonDataReturned;
 
+    final userSettingsData = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentlyLoggedInUser.uid)
+        .get();
+
+    if (userSettingsData.exists) {
+      rolePlaySelected = userSettingsData.data()!['roleforArticulation'] == null
+          ? rolePlayList[0]
+          : userSettingsData.data()!['roleforArticulation'].toString();
+      verboseSelected =
+          userSettingsData.data()!['verbosityforArticulation'] == null
+              ? verboseList[1]
+              : userSettingsData.data()!['verbosityforArticulation'].toString();
+    } else {
+      rolePlaySelected = rolePlayList[0];
+      verboseSelected = verboseList[1];
+    }
+
     final userData = await FirebaseFirestore.instance
         .collection('userProgressData')
         .doc(currentlyLoggedInUser.uid)
@@ -356,14 +429,6 @@ class _HomeState extends State<Home> {
         model: 'gemini-1.5-flash',
         apiKey: apiKey!,
         generationConfig: GenerationConfig(temperature: 0.0));
-
-/*     final currentPrompt = '''
-        You are an AI Guru and an expert in articulating complex concepts on AI in simpler terms. 
-
-        Please do not hallucinate, if you are not aware, please say it so in courteous fashion.
-
-        Imagine you have to explain the concept of ${topics[0].subTopics[_currentNuggetItem]} in $verboseSelected to $rolePlaySelected. As part of the reply please enclose the source of the information.
-    '''; */
 
     final currentPrompt = '''
         You are an AI Guru and an expert in articulating complex concepts on AI in simpler terms. 
@@ -403,518 +468,228 @@ class _HomeState extends State<Home> {
         outLoop++) {
       allSources.add(jsonDataReturned["Sources"][outLoop].toString().trim());
     }
+
+    _currentItem = "nugget";
+
     return Future.value("Done");
   }
 
   @override
   Widget build(BuildContext context) {
-    //final _widthOfScreen = MediaQuery.of(context).size.width;
     final _heightOfScreen = MediaQuery.of(context).size.height;
 
-/*     print("Height $_heightOfScreen");
-    print("Width $_widthOfScreen"); */
-
     // TODO: implement build
-    return columnarView
-        ? Scaffold(
-            appBar: AppBar(
-              title: /* Center(
-              child: Image.asset(
-            'assets/images/snailpace_logo_alt_2.png',
-            fit: BoxFit.contain,
-            height: 100,
-          )) */
-                  const Center(child: Text('SnailPace Learning')),
-              actions: [
-                IconButton(
-                    onPressed: () {
-                      FirebaseAuth.instance.signOut();
-                    },
-                    icon: Icon(
-                      Icons.exit_to_app,
-                      color: Theme.of(context).colorScheme.primary,
-                    ))
-              ],
-            ),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            body: Center(
-              child: SizedBox(
-                height: _heightOfScreen, // 800,
-                width: 500, //_widthOfScreen,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      CustomDropdownFilter(
-                        dropDownTitle: 'Selected Role',
-                        dropDownData: rolePlayList,
-                        defaultValue: rolePlaySelected,
-                        onSelectionOfOption: (selectedOption) {
-                          setState(() {
-                            rolePlaySelected = selectedOption;
-                          });
-                        },
-                      ),
-                      CustomDropdownFilter(
-                        dropDownTitle: 'Articulate',
-                        dropDownData: verboseList,
-                        defaultValue: verboseSelected,
-                        onSelectionOfOption: (selectedOption) {
-                          setState(() {
-                            verboseSelected = selectedOption;
-                          });
-                        },
-                      ),
-                      FutureBuilder(
-                        future: _currentSelectionToShow == 0
-                            ? getPromptCompletion()
-                            : (_currentSelectionToShow == 1
-                                ? getRandomTriviaOnAI()
-                                : getAssessment()),
-                        initialData:
-                            "Gemini API is working on the request, please wait",
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                                  ConnectionState.done &&
-                              !snapshot.hasError) {
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    FloatingActionButton(
-                                      onPressed: getThePreviousTopic,
-                                      child: const Icon(
-                                          Icons.skip_previous_rounded),
-                                    ),
-                                    /* IconButton(
-                                          onPressed: getThePreviousTopic,
-                                          icon: Icon(
-                                            size: 50,
-                                            Icons.skip_previous_rounded,
-                                            color: Colors.black,
-                                          )), */
-                                    /*                                   const SizedBox(
-                                        width: 250,
-                                      ), */
-                                    Image.asset(
-                                      'assets/images/snailpace_logo_alt_2.png',
-                                      height: 100,
-                                    ),
-                                    /*                                 IconButton(
-                                          onPressed: getTheNextTopic,
-                                          icon: Icon(
-                                            size: 50,
-                                            Icons.skip_next_rounded,
-                                            color: Colors.black,
-                                          )) */
-                                    FloatingActionButton(
-                                      onPressed: getTheNextTopic,
-                                      child: const Icon(
-                                        Icons.skip_next_rounded,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                if (_currentSelectionToShow <= 1)
-                                  Nuggets(
-                                    titleData: _currentSelectionToShow == 0
-                                        ? topics[0]
-                                            .subTopics[_currentNuggetItem]
-                                        : "Random Trivia on A.I.",
-                                    descriptionData:
-                                        conceptArticulation, //snapshot.data!,
-                                    sources: allSources,
-                                    nuggetType: _currentItem,
-                                  ),
-                                if (_currentSelectionToShow == 2)
-                                  QuizNuggets(
-                                    question:
-                                        "${jsonDataReturned["Question"].toString()}, choose the most appropriate option",
-                                    answerOptions: allOptions,
-                                    correctAnswer:
-                                        jsonDataReturned["Answer"].toString(),
-                                    onSelectAnswer: (question, choosenAnswer,
-                                        correctAnswer) {
-                                      eventOnSelectedAnswer(question,
-                                          choosenAnswer, correctAnswer);
-                                    },
-                                  ),
-                                /* Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    FloatingActionButton(
-                                      onPressed: getThePreviousTopic,
-                                      child: const Icon(
-                                          Icons.skip_previous_rounded),
-                                    ),
-                                    /* IconButton(
-                                          onPressed: getThePreviousTopic,
-                                          icon: Icon(
-                                            size: 50,
-                                            Icons.skip_previous_rounded,
-                                            color: Colors.black,
-                                          )), */
-                                    /*                                   const SizedBox(
-                                        width: 250,
-                                      ), */
-                                    Image.asset(
-                                      'assets/images/snailpace_logo_alt_2.png',
-                                      height: 100,
-                                    ),
-                                    /*                                 IconButton(
-                                          onPressed: getTheNextTopic,
-                                          icon: Icon(
-                                            size: 50,
-                                            Icons.skip_next_rounded,
-                                            color: Colors.black,
-                                          )) */
-                                    FloatingActionButton(
-                                      onPressed: getTheNextTopic,
-                                      child: const Icon(
-                                        Icons.skip_next_rounded,
-                                      ),
-                                    ),
-                                  ],
-                                ) ,*/
-                              ],
-                            );
-                          } else if (snapshot.hasError) {
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    FloatingActionButton(
-                                      onPressed: getThePreviousTopic,
-                                      child: const Icon(
-                                          Icons.skip_previous_rounded),
-                                    ),
-                                    /* IconButton(
-                                          onPressed: getThePreviousTopic,
-                                          icon: Icon(
-                                            size: 50,
-                                            Icons.skip_previous_rounded,
-                                            color: Colors.black,
-                                          )), */
-                                    /*                                   const SizedBox(
-                                        width: 250,
-                                      ), */
-                                    Image.asset(
-                                      'assets/images/snailpace_logo_alt_2.png',
-                                      height: 100,
-                                    ),
-                                    /*                                 IconButton(
-                                          onPressed: getTheNextTopic,
-                                          icon: Icon(
-                                            size: 50,
-                                            Icons.skip_next_rounded,
-                                            color: Colors.black,
-                                          )) */
-                                    FloatingActionButton(
-                                      onPressed: getTheNextTopic,
-                                      child: const Icon(
-                                        Icons.skip_next_rounded,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Nuggets(
-                                  titleData:
-                                      topics[0].subTopics[_currentNuggetItem],
-                                  descriptionData:
-                                      '''Error fetching data from Gemini API, ${snapshot.data}. There was an unexpected error.
-                                      Please use the above navigation buttons to move onto the next topic.
-                                      ''',
-                                  sources: [],
-                                  nuggetType: "error",
-                                ),
-                                /* Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    FloatingActionButton(
-                                      onPressed: getThePreviousTopic,
-                                      child: const Icon(
-                                          Icons.skip_previous_rounded),
-                                    ),
-                                    /* IconButton(
-                                          onPressed: getThePreviousTopic,
-                                          icon: Icon(
-                                            size: 50,
-                                            Icons.skip_previous_rounded,
-                                            color: Colors.black,
-                                          )), */
-                                    /*                                   const SizedBox(
-                                        width: 250,
-                                      ), */
-                                    Image.asset(
-                                      'assets/images/snailpace_logo_alt_2.png',
-                                      height: 100,
-                                    ),
-                                    /*                                 IconButton(
-                                          onPressed: getTheNextTopic,
-                                          icon: Icon(
-                                            size: 50,
-                                            Icons.skip_next_rounded,
-                                            color: Colors.black,
-                                          )) */
-                                    FloatingActionButton(
-                                      onPressed: getTheNextTopic,
-                                      child: const Icon(
-                                        Icons.skip_next_rounded,
-                                      ),
-                                    ),
-                                  ],
-                                ), */
-                              ],
-                            ); /* Text(
-                                  'Error fetching data from Gemini API, ${snapshot.data}'); */
-                          } else {
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    FloatingActionButton(
-                                      onPressed: getThePreviousTopic,
-                                      child: const Icon(
-                                          Icons.skip_previous_rounded),
-                                    ),
-                                    /* IconButton(
-                                          onPressed: getThePreviousTopic,
-                                          icon: Icon(
-                                            size: 50,
-                                            Icons.skip_previous_rounded,
-                                            color: Colors.black,
-                                          )), */
-                                    /*                                   const SizedBox(
-                                        width: 250,
-                                      ), */
-                                    Image.asset(
-                                      'assets/images/snailpace_logo_alt_2.png',
-                                      height: 100,
-                                    ),
-                                    /*                                 IconButton(
-                                          onPressed: getTheNextTopic,
-                                          icon: Icon(
-                                            size: 50,
-                                            Icons.skip_next_rounded,
-                                            color: Colors.black,
-                                          )) */
-                                    FloatingActionButton(
-                                      onPressed: getTheNextTopic,
-                                      child: const Icon(
-                                        Icons.skip_next_rounded,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Nuggets(
-                                  titleData:
-                                      topics[0].subTopics[_currentNuggetItem],
-                                  descriptionData:
-                                      "Gemini API is processing your request, please wait......",
-                                  sources: [],
-                                  nuggetType: "in-process",
-                                )
-                              ],
-                            );
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          )
-        // Row View
-        : Scaffold(
-            appBar: AppBar(
-              title: /* Center(
-              child: Image.asset(
-            'assets/images/snailpace_logo_alt_2.png',
-            fit: BoxFit.contain,
-            height: 100,
-          )) */
-                  const Center(child: Text('SnailPace Learning')),
-              actions: [
-                IconButton(
-                    onPressed: () {
-                      FirebaseAuth.instance.signOut();
-                    },
-                    icon: Icon(
-                      Icons.exit_to_app,
-                      color: Theme.of(context).colorScheme.primary,
-                    ))
-              ],
-            ),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            body: Center(
-              child: SizedBox(
-                width: 650,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    CustomDropdownFilter(
-                      dropDownTitle: 'Selected Role',
-                      dropDownData: rolePlayList,
-                      defaultValue: rolePlaySelected,
-                      onSelectionOfOption: (selectedOption) {
-                        setState(() {
-                          rolePlaySelected = selectedOption;
-                        });
-                      },
-                    ),
-                    CustomDropdownFilter(
-                      dropDownTitle: 'Articulate',
-                      dropDownData: verboseList,
-                      defaultValue: verboseSelected,
-                      onSelectionOfOption: (selectedOption) {
-                        setState(() {
-                          verboseSelected = selectedOption;
-                        });
-                      },
-                    ),
-                    FutureBuilder(
-                      future: _currentSelectionToShow == 0
-                          ? getPromptCompletion()
-                          : (_currentSelectionToShow == 1
-                              ? getRandomTriviaOnAI()
-                              : getAssessment()),
-                      initialData:
-                          "Gemini API is working on the request, please wait",
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done &&
-                            !snapshot.hasError) {
-                          return Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Center(child: Text('Snailpace-ai Learning')),
+        actions: [
+          IconButton(
+              onPressed: () {
+                FirebaseAuth.instance.signOut();
+              },
+              icon: Icon(
+                Icons.exit_to_app,
+                color: Theme.of(context).colorScheme.primary,
+              ))
+        ],
+      ),
+      drawer: CustomDrawer(),
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      body: Center(
+        child: SizedBox(
+          height: _heightOfScreen, // 800,
+          width: 500, //_widthOfScreen,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                FutureBuilder(
+                  future: _currentSelectionToShow == 0
+                      ? getPromptCompletion()
+                      : (_currentSelectionToShow == 1
+                          ? getRandomTriviaOnAI()
+                          : getAssessment()),
+                  initialData:
+                      "Gemini API is working on the request, please wait",
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        !snapshot.hasError) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  FloatingActionButton(
-                                    onPressed: getThePreviousTopic,
-                                    child:
-                                        const Icon(Icons.skip_previous_rounded),
-                                  ),
-                                  if (_currentSelectionToShow <= 1)
-                                    Nuggets(
-                                      titleData: _currentSelectionToShow == 0
-                                          ? topics[0]
-                                              .subTopics[_currentNuggetItem]
-                                          : "Random Trivia on A.I.",
-                                      descriptionData:
-                                          conceptArticulation, //snapshot.data!,
-                                      sources: allSources,
-                                      nuggetType: _currentItem,
-                                    ),
-                                  if (_currentSelectionToShow == 2)
-                                    QuizNuggets(
-                                      question:
-                                          "${jsonDataReturned["Question"].toString()}, choose the most appropriate option",
-                                      answerOptions: allOptions,
-                                      correctAnswer:
-                                          jsonDataReturned["Answer"].toString(),
-                                      onSelectAnswer: (question, choosenAnswer,
-                                          correctAnswer) {
-                                        logQuizData(question, choosenAnswer,
-                                            correctAnswer);
-
-                                        eventOnSelectedAnswer(question,
-                                            choosenAnswer, correctAnswer);
-                                      },
-                                    ),
-                                  FloatingActionButton(
-                                    onPressed: getTheNextTopic,
-                                    child: const Icon(
-                                      Icons.skip_next_rounded,
-                                    ),
-                                  ),
-
-                                  /* Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      FloatingActionButton(
-                                        onPressed: getThePreviousTopic,
-                                        child:
-                                            const Icon(Icons.skip_previous_rounded),
-                                      ),
-                                      /* IconButton(
-                                            onPressed: getThePreviousTopic,
-                                            icon: Icon(
-                                              size: 50,
-                                              Icons.skip_previous_rounded,
-                                              color: Colors.black,
-                                            )), */
-                                      /*                                   const SizedBox(
-                                          width: 250,
-                                        ), */
-                                      Image.asset(
-                                        'assets/images/snailpace_logo_alt_2.png',
-                                        height: 100,
-                                      ),
-                                      /*                                 IconButton(
-                                            onPressed: getTheNextTopic,
-                                            icon: Icon(
-                                              size: 50,
-                                              Icons.skip_next_rounded,
-                                              color: Colors.black,
-                                            )) */
-                                      FloatingActionButton(
-                                        onPressed: getTheNextTopic,
-                                        child: const Icon(
-                                          Icons.skip_next_rounded,
-                                        ),
-                                      ),
-                                    ],
-                                  ), */
-                                ],
-                              ),
                               Image.asset(
                                 'assets/images/snailpace_logo_alt_2.png',
                                 height: 100,
                               ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              FloatingActionButton(
+                                heroTag: "refreshTopic",
+                                onPressed: refreshTopic,
+                                child: const Icon(Icons.refresh),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              FloatingActionButton(
+                                heroTag: "getThePreviousTopic",
+                                onPressed: getThePreviousTopic,
+                                child: const Icon(Icons.skip_previous_rounded),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              FloatingActionButton(
+                                heroTag: "getTheNextTopic",
+                                onPressed: getTheNextTopic,
+                                child: const Icon(
+                                  Icons.skip_next_rounded,
+                                ),
+                              ),
                             ],
-                          );
-                        } else if (snapshot.hasError) {
-                          return Column(
+                          ),
+                          if (_currentSelectionToShow <= 1)
+                            Nuggets(
+                              titleData: _currentSelectionToShow == 0
+                                  ? topics[0].subTopics[_currentNuggetItem]
+                                  : "Random Trivia on A.I.",
+                              descriptionData:
+                                  conceptArticulation, //snapshot.data!,
+                              sources: allSources,
+                              nuggetType: _currentItem,
+                              userSelectedRole: rolePlaySelected,
+                              userSelectedVerbosity: verboseSelected,
+                            ),
+                          if (_currentSelectionToShow == 2)
+                            QuizNuggets(
+                              question:
+                                  "${jsonDataReturned["Question"].toString()}, choose the most appropriate option",
+                              answerOptions: allOptions,
+                              correctAnswer:
+                                  jsonDataReturned["Answer"].toString(),
+                              reasoningForTheAnswer:
+                                  jsonDataReturned["Reasoning"].toString(),
+                              onSelectAnswer: (question, choosenAnswer,
+                                  correctAnswer, reasoningForTheAnswer) {
+                                eventOnSelectedAnswer(question, choosenAnswer,
+                                    correctAnswer, reasoningForTheAnswer);
+                              },
+                            ),
+                        ],
+                      );
+                    } else if (snapshot.hasError) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Nuggets(
-                                titleData:
-                                    topics[0].subTopics[_currentNuggetItem],
-                                descriptionData:
-                                    'Error fetching data from Gemini API, ${snapshot.data}',
-                                sources: [],
-                                nuggetType: "error",
-                              )
+                              Image.asset(
+                                'assets/images/snailpace_logo_alt_2.png',
+                                height: 100,
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              FloatingActionButton(
+                                heroTag: "refreshTopic",
+                                onPressed: refreshTopic,
+                                child: const Icon(Icons.refresh),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              FloatingActionButton(
+                                heroTag: "getThePreviousTopic",
+                                onPressed: getThePreviousTopic,
+                                child: const Icon(Icons.skip_previous_rounded),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              FloatingActionButton(
+                                heroTag: "getTheNextTopic",
+                                onPressed: getTheNextTopic,
+                                child: const Icon(
+                                  Icons.skip_next_rounded,
+                                ),
+                              ),
                             ],
-                          ); /* Text(
-                                'Error fetching data from Gemini API, ${snapshot.data}'); */
-                        } else {
-                          return Column(
+                          ),
+                          Nuggets(
+                            titleData: topics[0].subTopics[_currentNuggetItem],
+                            descriptionData:
+                                '''Error fetching data from Gemini API, ${snapshot.data}. There was an unexpected error. Please use one of the navigation buttons to either referesh or move forward.''',
+                            sources: [],
+                            userSelectedRole: "",
+                            userSelectedVerbosity: "",
+                            nuggetType: "error",
+                          ),
+                        ],
+                      );
+                    } else {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Nuggets(
-                                titleData:
-                                    topics[0].subTopics[_currentNuggetItem],
-                                descriptionData:
-                                    "Gemini API is processing your request, please wait",
-                                sources: [],
-                                nuggetType: "in-process",
-                              )
+                              Image.asset(
+                                'assets/images/snailpace_logo_alt_2.png',
+                                height: 100,
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              FloatingActionButton(
+                                heroTag: "refreshTopic",
+                                onPressed: refreshTopic,
+                                child: const Icon(Icons.refresh),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              FloatingActionButton(
+                                heroTag: "getThePreviousTopic",
+                                onPressed: getThePreviousTopic,
+                                child: const Icon(Icons.skip_previous_rounded),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              FloatingActionButton(
+                                heroTag: "getTheNextTopic",
+                                onPressed: getTheNextTopic,
+                                child: const Icon(
+                                  Icons.skip_next_rounded,
+                                ),
+                              ),
                             ],
-                          );
-                        }
-                      },
-                    ),
-                  ],
+                          ),
+                          Nuggets(
+                            titleData: topics[0].subTopics[_currentNuggetItem],
+                            descriptionData:
+                                "Gemini API is processing your request, please wait......",
+                            sources: [],
+                            nuggetType: "in-process",
+                            userSelectedRole: "",
+                            userSelectedVerbosity: "",
+                          ),
+                        ],
+                      );
+                    }
+                  },
                 ),
-              ),
+              ],
             ),
-          );
+          ),
+        ),
+      ),
+    );
+    // Row View
   }
 }

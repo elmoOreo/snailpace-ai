@@ -9,12 +9,16 @@ class Nuggets extends StatelessWidget {
       required this.titleData,
       required this.descriptionData,
       required this.sources,
-      required this.nuggetType});
+      required this.nuggetType,
+      required this.userSelectedRole,
+      required this.userSelectedVerbosity});
 
   final String titleData;
   final String descriptionData;
   final String nuggetType;
   final List<String> sources;
+  final String userSelectedRole;
+  final String userSelectedVerbosity;
   @override
   Widget build(BuildContext context) {
     //final _widthOfScreen = MediaQuery.of(context).size.width;
@@ -34,7 +38,7 @@ class Nuggets extends StatelessWidget {
                   : Colors.redAccent[300])),
       child: SizedBox(
         width: 500, //_widthOfScreen
-        height: _heightOfScreen * .60, //500,
+        height: _heightOfScreen * .75, //500,
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -46,63 +50,60 @@ class Nuggets extends StatelessWidget {
                     fontSize: 25,
                   ),
                 ),
+                if (nuggetType == "nugget")
+                  Text(
+                    "Articulated for a $userSelectedRole in less than $userSelectedVerbosity",
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
                 const SizedBox(
-                  height: 5,
+                  height: 10,
                 ),
-/*                 LinkifyText(
-                  descriptionData,
-                  fontColor: Colors.black,
-                  fontSize: 15,
-                ), */
                 Text(
                   descriptionData,
                   style: TextStyle(
-                    fontSize: nuggetType == "error" ? 25 : 15,
+                    fontSize: nuggetType == "error" ? 25 : 20,
                   ),
                 ),
                 const SizedBox(
                   height: 20,
                 ),
-                ...sources.map((item) {
-                  linkCount++;
-                  return
-/*                   InkWell(
-                    onTap: () =>
-                        isURL(item) ? launchUrl(Uri.parse(item)) : () {},
-                    child: Text(
-                      "Source Link $linkCount",
-                      textAlign: TextAlign.left,
-                      style: const TextStyle(
-                          decoration: TextDecoration.underline,
-                          color: Colors.black),
-                    ),
-                  ); */
-                      Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: InkWell(
-                          onTap: () =>
-                              isURL(item) ? launchUrl(Uri.parse(item)) : () {},
-                          child: Text(
-                            isURL(item)
-                                ? "Source Link $linkCount : : $item"
-                                : item,
-                            textAlign: TextAlign.left,
-                            style: const TextStyle(
-                              decoration: TextDecoration.underline,
-                              color: Colors.black,
-                              fontSize: 15,
+                ...sources.map(
+                  (item) {
+                    linkCount++;
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: InkWell(
+                            onTap: () => isURL(item)
+                                ? launchUrl(Uri.parse(item))
+                                : () {},
+                            child: Text(
+                              isURL(item)
+                                  ? "Source Link $linkCount : : $item"
+                                  : item,
+                              textAlign: TextAlign.left,
+                              style: const TextStyle(
+                                decoration: TextDecoration.underline,
+                                color: Colors.black,
+                                fontSize: 15,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(
-                        height: 2,
-                      ),
-                    ],
-                  );
-                })
+                        const SizedBox(
+                          height: 10,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                if (nuggetType == "nugget")
+                  const Text(
+                    "***Note*** You can change the style of narration, both role and length using the user settings on the top left corner. Hit the refresh button once you make the change.",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
               ],
             ),
           ),

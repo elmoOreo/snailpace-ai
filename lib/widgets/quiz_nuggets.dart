@@ -8,14 +8,15 @@ class QuizNuggets extends StatefulWidget {
     required this.answerOptions,
     required this.correctAnswer,
     required this.onSelectAnswer,
+    required this.reasoningForTheAnswer,
   });
 
   final String question;
   final List<String> answerOptions;
   final String correctAnswer;
-  final void Function(
-          String question, String choosenAnswer, String correctAnswer)
-      onSelectAnswer;
+  final String reasoningForTheAnswer;
+  final void Function(String question, String choosenAnswer,
+      String correctAnswer, String reasoningForTheAnswer) onSelectAnswer;
 
   @override
   State<QuizNuggets> createState() {
@@ -25,13 +26,16 @@ class QuizNuggets extends StatefulWidget {
 }
 
 class _QuizNuggetsState extends State<QuizNuggets> {
-  void onTapOfTheButton(
-      String question, String choosenAnswer, String correctAnswer) {
-    widget.onSelectAnswer(question, choosenAnswer, correctAnswer);
+  void onTapOfTheButton(String question, String choosenAnswer,
+      String correctAnswer, String reasoningForTheAnswer) {
+    widget.onSelectAnswer(
+        question, choosenAnswer, correctAnswer, reasoningForTheAnswer);
   }
 
   @override
   Widget build(BuildContext context) {
+    final _heightOfScreen = MediaQuery.of(context).size.height;
+
     // TODO: implement build
     return Card(
       elevation: 50,
@@ -39,7 +43,7 @@ class _QuizNuggetsState extends State<QuizNuggets> {
       color: Colors.cyanAccent[100],
       child: SizedBox(
         width: 500,
-        height: 500,
+        height: _heightOfScreen * .75, //500
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -62,7 +66,10 @@ class _QuizNuggetsState extends State<QuizNuggets> {
                         answerText: item,
                         onTap: () {
                           onTapOfTheButton(
-                              widget.question, item, widget.correctAnswer);
+                              widget.question,
+                              item,
+                              widget.correctAnswer,
+                              widget.reasoningForTheAnswer);
                         },
                       ),
                       const SizedBox(

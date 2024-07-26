@@ -50,6 +50,8 @@ dependencies:
   sentry_flutter: ^8.4.0
   string_validator: ^1.1.0
   any_link_preview: ^3.0.2
+  flutter_riverpod: ^2.5.1
+  dropdown_search: ^5.0.6
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:snailpace/screens/chat.dart';
 import 'package:snailpace/screens/user_settings.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -10,16 +11,48 @@ class CustomDrawer extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
+          DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: Theme.of(context).colorScheme.primary,
             ),
-            child: Text('Drawer Header'),
+            child: Image.asset('assets/images/snailpace_logo_alt_2.png'),
           ),
           ListTile(
-            title: const Text('User Settings'),
+            title: const Row(
+              children: [
+                Icon(Icons.settings),
+                SizedBox(
+                  width: 20,
+                ),
+                Text('User Settings')
+              ],
+            ),
             onTap: () {
-              UserSettings();
+              Navigator.pop(context);
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserSettings()),
+              );
+            },
+          ),
+          ListTile(
+            title: const Row(
+              children: [
+                Icon(Icons.chat),
+                SizedBox(
+                  width: 20,
+                ),
+                Text('Ask Snail')
+              ],
+            ),
+            onTap: () {
+              Navigator.pop(context);
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChatScreen()),
+              );
             },
           ),
         ],
