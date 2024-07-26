@@ -175,56 +175,59 @@ class _HomeState extends State<Home> {
         insetPadding: const EdgeInsets.all(1),
         title: const Text('Quiz Result'),
         content: SingleChildScrollView(
-          child: Column(
-            children: [
-              ColoredBox(
-                color: Colors.lightBlueAccent,
-                child: Text(
-                  'Question : $question',
+          child: SizedBox(
+            width: 500,
+            child: Column(
+              children: [
+                ColoredBox(
+                  color: Colors.lightBlueAccent,
+                  child: Text(
+                    'Question : $question',
+                    textAlign: TextAlign.left,
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                ),
+                const Divider(
+                  height: 10,
+                  thickness: 2,
+                  indent: 0,
+                  endIndent: 0,
+                  color: Colors.black,
+                ),
+                Text(
+                  'Choosen Answer : $choosenAnswer',
                   textAlign: TextAlign.left,
                   style: const TextStyle(fontSize: 20),
                 ),
-              ),
-              const Divider(
-                height: 10,
-                thickness: 2,
-                indent: 0,
-                endIndent: 0,
-                color: Colors.black,
-              ),
-              Text(
-                'Choosen Answer : $choosenAnswer',
-                textAlign: TextAlign.left,
-                style: const TextStyle(fontSize: 20),
-              ),
-              const Divider(
-                height: 10,
-                thickness: 2,
-                indent: 0,
-                endIndent: 0,
-                color: Colors.black,
-              ),
-              Text(
-                'Correct Answer : $correctAnswer',
-                textAlign: TextAlign.left,
-                style: const TextStyle(fontSize: 20),
-              ),
-              const Divider(
-                height: 10,
-                thickness: 2,
-                indent: 0,
-                endIndent: 0,
-                color: Colors.black,
-              ),
-              ColoredBox(
-                color: Colors.lightGreenAccent,
-                child: Text(
-                  'Reasoning for the Answer : $reasoningForTheAnswer',
+                const Divider(
+                  height: 10,
+                  thickness: 2,
+                  indent: 0,
+                  endIndent: 0,
+                  color: Colors.black,
+                ),
+                Text(
+                  'Correct Answer : $correctAnswer',
                   textAlign: TextAlign.left,
                   style: const TextStyle(fontSize: 20),
                 ),
-              )
-            ],
+                const Divider(
+                  height: 10,
+                  thickness: 2,
+                  indent: 0,
+                  endIndent: 0,
+                  color: Colors.black,
+                ),
+                ColoredBox(
+                  color: Colors.lightGreenAccent,
+                  child: Text(
+                    'Reasoning for the Answer : $reasoningForTheAnswer',
+                    textAlign: TextAlign.left,
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                )
+              ],
+            ),
           ),
         ),
         actions: <Widget>[

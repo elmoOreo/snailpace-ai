@@ -172,12 +172,19 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     // TODO: implement build
     final _heightOfScreen = MediaQuery.of(context).size.height;
-    var dataCount = 0;
+    var dataCount = userChatShowList.length;
 
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Snailpace-ai Learning')),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            // Navigate back to the previous screen by popping the current route
+            Navigator.pop(context);
+          },
+        ),
         actions: [
           IconButton(
               onPressed: () {
@@ -278,7 +285,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
               if (processInExecution)
-                SizedBox(
+                const SizedBox(
                   height: 100,
                   width: 100,
                   child: const CircularProgressIndicator(
@@ -291,7 +298,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: Column(
                     children: [
                       ...userChatShowList.map((item) {
-                        dataCount++;
+                        dataCount--;
                         linkCount = 0;
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -307,11 +314,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                       child: Padding(
                                         padding: const EdgeInsets.all(15.0),
                                         child: Text(
-                                          userChatShowList[dataCount - 1],
+                                          userChatShowList[dataCount],
                                           style: TextStyle(fontSize: 15),
                                         ),
                                       )),
-                                  Expanded(
+                                  const Expanded(
                                     child: SizedBox(
                                       width: 50,
                                     ),
@@ -327,12 +334,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                   color: Colors.greenAccent[200],
                                   child: Padding(
                                     padding: const EdgeInsets.all(15.0),
-                                    child: Text(
-                                        modelChatShowList[dataCount - 1],
+                                    child: Text(modelChatShowList[dataCount],
                                         style: TextStyle(fontSize: 15)),
                                   )),
                             ),
-                            ...modelChatSourceList[dataCount - 1].map((item) {
+                            ...modelChatSourceList[dataCount].map((item) {
                               linkCount++;
                               return SizedBox(
                                 width: 500,
