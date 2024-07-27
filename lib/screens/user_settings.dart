@@ -61,133 +61,141 @@ class UserSettings extends StatelessWidget {
     final _heightOfScreen = MediaQuery.of(context).size.height;
 
     // TODO: implement build
-    return Scaffold(
-      appBar: AppBar(
-        title: const Center(child: Text('Snailpace-ai Learning')),
-        actions: [
-          IconButton(
-              onPressed: () {
-                FirebaseAuth.instance.signOut();
-              },
-              icon: Icon(
-                Icons.exit_to_app,
-                color: Theme.of(context).colorScheme.primary,
-              ))
-        ],
-      ),
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: Center(
-        child: SizedBox(
-          height: _heightOfScreen, // 800,
-          width: 500, //_widthOfScreen,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                FutureBuilder(
-                  future: getUserSettings(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done &&
-                        !snapshot.hasError) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            'My Settings',
-                            style: TextStyle(fontSize: 20, color: Colors.white),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          CustomDropdownFilter(
-                            dropDownTitle: 'Selected Role',
-                            dropDownData: rolePlayList,
-                            defaultValue: _userSelectedRolePlay,
-                            onSelectionOfOption: (selectedOption) {
-                              _userSelectedRolePlay = selectedOption;
-                            },
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          CustomDropdownFilter(
-                            dropDownTitle: 'Articulate',
-                            dropDownData: verboseList,
-                            defaultValue: _userSelectedVerbose,
-                            onSelectionOfOption: (selectedOption) {
-                              _userSelectedVerbose = selectedOption;
-                            },
-                          )
-                        ],
-                      );
-                    } else if (snapshot.hasError) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            'My Settings',
-                            style: TextStyle(fontSize: 20, color: Colors.white),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          CustomDropdownFilter(
-                            dropDownTitle: 'Selected Role',
-                            dropDownData: rolePlayList,
-                            defaultValue: rolePlayList[0],
-                            onSelectionOfOption: (selectedOption) {
-                              _userSelectedRolePlay = selectedOption;
-                            },
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          CustomDropdownFilter(
-                            dropDownTitle: 'Articulate',
-                            dropDownData: verboseList,
-                            defaultValue: verboseList[0],
-                            onSelectionOfOption: (selectedOption) {
-                              _userSelectedVerbose = selectedOption;
-                            },
-                          )
-                        ],
-                      );
-                    } else {
-                      return const Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            'Loading Data from database',
-                            style: TextStyle(fontSize: 20, color: Colors.white),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                        ],
-                      );
-                    }
-                  },
-                ),
-                SizedBox(
-                  height: 25,
-                ),
-                ElevatedButton.icon(
-                  label: const Text('Save User Settings'),
-                  icon: const Icon(Icons.save),
+    return Center(
+      child: Container(
+        width: 500,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Center(child: Text('Snailpace-ai Learning')),
+            actions: [
+              IconButton(
                   onPressed: () {
-                    saveUserSettings();
-                    Navigator.pop(context);
+                    FirebaseAuth.instance.signOut();
                   },
-                )
-              ],
+                  icon: Icon(
+                    Icons.exit_to_app,
+                    color: Theme.of(context).colorScheme.primary,
+                  ))
+            ],
+          ),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          body: Center(
+            child: SizedBox(
+              height: _heightOfScreen, // 800,
+              width: 500, //_widthOfScreen,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    FutureBuilder(
+                      future: getUserSettings(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done &&
+                            !snapshot.hasError) {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                'My Settings',
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              CustomDropdownFilter(
+                                dropDownTitle: 'Selected Role',
+                                dropDownData: rolePlayList,
+                                defaultValue: _userSelectedRolePlay,
+                                onSelectionOfOption: (selectedOption) {
+                                  _userSelectedRolePlay = selectedOption;
+                                },
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              CustomDropdownFilter(
+                                dropDownTitle: 'Articulate',
+                                dropDownData: verboseList,
+                                defaultValue: _userSelectedVerbose,
+                                onSelectionOfOption: (selectedOption) {
+                                  _userSelectedVerbose = selectedOption;
+                                },
+                              )
+                            ],
+                          );
+                        } else if (snapshot.hasError) {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                'My Settings',
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              CustomDropdownFilter(
+                                dropDownTitle: 'Selected Role',
+                                dropDownData: rolePlayList,
+                                defaultValue: rolePlayList[0],
+                                onSelectionOfOption: (selectedOption) {
+                                  _userSelectedRolePlay = selectedOption;
+                                },
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              CustomDropdownFilter(
+                                dropDownTitle: 'Articulate',
+                                dropDownData: verboseList,
+                                defaultValue: verboseList[0],
+                                onSelectionOfOption: (selectedOption) {
+                                  _userSelectedVerbose = selectedOption;
+                                },
+                              )
+                            ],
+                          );
+                        } else {
+                          return const Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                'Loading Data from database',
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                    SizedBox(
+                      height: 25,
+                    ),
+                    ElevatedButton.icon(
+                      label: const Text('Save User Settings'),
+                      icon: const Icon(Icons.save),
+                      onPressed: () {
+                        saveUserSettings();
+                        Navigator.pop(context);
+                      },
+                    )
+                  ],
+                ),
+              ),
             ),
           ),
         ),

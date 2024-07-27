@@ -52,12 +52,13 @@ class Nuggets extends StatelessWidget {
                 ),
                 if (nuggetType == "in-process")
                   const SizedBox(
-                      height: 100,
-                      width: 100,
-                      child: const CircularProgressIndicator(
-                        color: Colors.white,
-                        backgroundColor: Colors.amber,
-                      )),
+                    height: 100,
+                    width: 100,
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                      backgroundColor: Colors.amber,
+                    ),
+                  ),
                 if (nuggetType == "nugget")
                   Text(
                     "Articulated for a $userSelectedRole in less than $userSelectedVerbosity",

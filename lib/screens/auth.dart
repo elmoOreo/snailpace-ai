@@ -85,7 +85,7 @@ class _AuthScreenState extends State<AuthScreen> {
         body: Center(
           child: SingleChildScrollView(
               child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               const Text(
                 "Welcome to SnailPace Learning",
@@ -95,9 +95,23 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
               ),
               const Text(
-                "Powered by Gemini Generative AI",
+                "Helps you to DECODE everything in AI",
                 style: TextStyle(
                   fontSize: 20,
+                  color: Colors.yellowAccent,
+                ),
+              ),
+              const Text(
+                "CHAT with AI on AI to understand AI",
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.yellowAccent,
+                ),
+              ),
+              const Text(
+                "Powered by Gemini Generative AI",
+                style: TextStyle(
+                  fontSize: 15,
                   color: Colors.white,
                 ),
               ),
