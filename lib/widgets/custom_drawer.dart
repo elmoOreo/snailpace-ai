@@ -30,10 +30,10 @@ class CustomDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
 
-              Navigator.push(
+/*               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => UserSettings()),
-              );
+              ); */
             },
           ),
           ListTile(
@@ -49,10 +49,10 @@ class CustomDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
 
-              Navigator.push(
+/*               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ChatScreen()),
-              );
+              ); */
             },
           ),
         ],

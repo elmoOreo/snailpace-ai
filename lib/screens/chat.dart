@@ -10,13 +10,20 @@ import 'package:snailpace/data/roleplay_data.dart';
 
 import 'package:snailpace/data/topic_data.dart';
 import 'package:snailpace/data/verbose_data.dart';
+import 'package:snailpace/screens/landing.dart';
 import 'package:snailpace/widgets/chat_filter.dart';
 import 'package:snailpace/widgets/chat_nuggets.dart';
-import 'package:string_validator/string_validator.dart';
-import 'package:url_launcher/url_launcher.dart';
+/* import 'package:string_validator/string_validator.dart';
+import 'package:url_launcher/url_launcher.dart'; */
+
+var _firstloadedDateTime = DateTime.now();
+var _nextloadedDateTime = DateTime.now();
+String _selectedTopicForDiscussion = "";
 
 class ChatScreen extends StatefulWidget {
-  ChatScreen({super.key});
+  ChatScreen({super.key, required this.goToWidget});
+
+  final void Function(String widgetName) goToWidget;
 
   @override
   State<ChatScreen> createState() {
@@ -143,6 +150,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void getInitialCompletion(String selectedItem) async {
+    _firstloadedDateTime = DateTime.now();
     setState(() {});
     userChatShowList.clear();
     modelChatShowList.clear();
@@ -169,6 +177,38 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       processInExecution = false;
     });
+    _nextloadedDateTime = DateTime.now();
+    logUserProgressData();
+    _firstloadedDateTime = DateTime.now();
+  }
+
+  void logUserProgressData() async {
+    double timeSpentForLearningPoints = 0;
+
+    // Assuming no content exceeds 120/5 seconds of learning.
+
+    timeSpentForLearningPoints =
+        _nextloadedDateTime.difference(_firstloadedDateTime).inSeconds.abs() /
+            5;
+
+    final userProgressDetailData = <String, dynamic>{
+      "userId": currentlyLoggedInUser.uid,
+      "currentNugget": topics[0]
+          .subTopics
+          .indexOf(selectedTopicForDiscussion.toString().trim()),
+      "currentNuggetItem": selectedTopicForDiscussion.toString().trim(),
+      "startedAt": _firstloadedDateTime,
+      "finishedAt": _nextloadedDateTime,
+      "timeSpent":
+          _nextloadedDateTime.difference(_firstloadedDateTime).inSeconds.abs(),
+      "timeSpentForLearningPoints":
+          timeSpentForLearningPoints > 24 ? 24 : timeSpentForLearningPoints,
+      "type": "Chat"
+    };
+
+    await FirebaseFirestore.instance
+        .collection('userProgressDetailData')
+        .add(userProgressDetailData);
   }
 
   @override
@@ -178,52 +218,73 @@ class _ChatScreenState extends State<ChatScreen> {
     var dataCount = userChatShowList.length;
 
     // TODO: implement build
-    return Center(
-      child: Container(
-        width: 500,
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Center(child: Text('Snailpace-ai Learning')),
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back),
-              onPressed: () {
-                // Navigate back to the previous screen by popping the current route
-                Navigator.pop(context);
-              },
-            ),
-/*             actions: [
-              IconButton(
-                  onPressed: () {
-                    FirebaseAuth.instance.signOut();
-                  },
-                  icon: Icon(
-                    Icons.exit_to_app,
-                    color: Theme.of(context).colorScheme.primary,
-                  ))
-            ], */
+    return
+/*     Center(
+      child:  */
+        Container(
+      width: 500,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Center(child: Text('Snailpace-ai Learning')),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              // Navigate back to the previous screen by popping the current route
+              //Navigator.pop(context);
+
+              widget.goToWidget("Landing");
+
+              //Navigator.of(context).popUntil((route) => route.isFirst);
+/* 
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => Landing())); */
+/*                 Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Landing()),
+                ); */
+            },
           ),
-          backgroundColor: Theme.of(context)
-              .colorScheme
-              .primary, //Color.fromARGB(255, 154, 212, 242),
-          body: SingleChildScrollView(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  ChatFilter(
-                      selectedTopicForDiscussion: topics[0].subTopics[0],
-                      getInitialCompletion: (item) {
-                        processInExecution = true;
-                        setState(() {});
-                        getInitialCompletion(item);
-                      },
-                      topicForSelection: topics[0].subTopics,
-                      askSnail: (queryFromUser) {
-                        processInExecution = true;
-                        setState(() {});
-                        askSnail(queryFromUser);
-                      }),
-                  /* SizedBox(
+          actions: [
+            IconButton(
+                onPressed: () {
+                  FirebaseAuth.instance.signOut();
+                  widget.goToWidget("AuthScreen");
+                  //Navigator.of(context, rootNavigator: true).pop(context);
+                },
+                icon: Icon(
+                  Icons.exit_to_app,
+                  color: Theme.of(context).colorScheme.primary,
+                ))
+          ],
+        ),
+        backgroundColor: Theme.of(context)
+            .colorScheme
+            .primary, //Color.fromARGB(255, 154, 212, 242),
+        body: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                ChatFilter(
+                    selectedTopicForDiscussion: _selectedTopicForDiscussion ==
+                            "null"
+                        ? ""
+                        : _selectedTopicForDiscussion, //topics[0].subTopics[0],
+                    getInitialCompletion: (item) {
+                      _selectedTopicForDiscussion = item;
+                      processInExecution = true;
+                      setState(() {});
+                      getInitialCompletion(item);
+                    },
+                    topicForSelection: topics[0].subTopics,
+                    askSnail: (queryFromUser) {
+                      processInExecution = true;
+                      setState(() {});
+                      askSnail(queryFromUser);
+                    }),
+                /* SizedBox(
                   height: 10,
                 ),
                 SizedBox(
@@ -303,22 +364,22 @@ class _ChatScreenState extends State<ChatScreen> {
                     ],
                   ),
                 ), */
-                  if (processInExecution)
-                    const SizedBox(
-                      height: 100,
-                      width: 100,
-                      child: const CircularProgressIndicator(
-                        color: Colors.white,
-                        backgroundColor: Colors.amber,
-                      ),
+                if (processInExecution)
+                  const SizedBox(
+                    height: 100,
+                    width: 100,
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                      backgroundColor: Colors.amber,
                     ),
-                  if (!processInExecution)
-                    ChatNuggets(
-                        dataCountNuggets: dataCount,
-                        userChatShowList: userChatShowList,
-                        modelChatShowList: modelChatShowList,
-                        modelChatSourceList: modelChatSourceList),
-                  /* SingleChildScrollView(
+                  ),
+                if (!processInExecution)
+                  ChatNuggets(
+                      dataCountNuggets: dataCount,
+                      userChatShowList: userChatShowList,
+                      modelChatShowList: modelChatShowList,
+                      modelChatSourceList: modelChatSourceList),
+                /* SingleChildScrollView(
                       child: Column(
                         children: [
                           ...userChatShowList.map((item) {
@@ -400,12 +461,12 @@ class _ChatScreenState extends State<ChatScreen> {
                         ],
                       ),
                     ), */
-                ],
-              ),
+              ],
             ),
           ),
         ),
       ),
     );
+    //);
   }
 }

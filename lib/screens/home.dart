@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:snailpace/screens/chat.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:snailpace/screens/landing.dart';
+/* import 'package:snailpace/screens/chat.dart';
 import 'package:snailpace/screens/user_settings.dart';
-import 'package:snailpace/widgets/custom_drawer.dart';
+import 'package:snailpace/widgets/custom_drawer.dart'; */
 import 'package:snailpace/widgets/nuggets.dart';
 import 'package:snailpace/data/topic_data.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -11,6 +13,7 @@ import 'dart:convert';
 import 'package:snailpace/widgets/quiz_nuggets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 var _currentNuggetItem = 0;
 var _currentItem = "in-process";
@@ -21,11 +24,16 @@ var jsonDataReturned;
 List<String> allOptions = [];
 bool columnarView = true;
 List<String> allSources = [];
+var _firstloadedDateTime = DateTime.now();
+var _nextloadedDateTime = DateTime.now();
 
 var conceptArticulation;
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  const Home({super.key, required this.goToWidget});
+
+  final void Function(String widgetName) goToWidget;
+
   @override
   State<Home> createState() {
     // TODO: implement createState
@@ -35,6 +43,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final currentlyLoggedInUser = FirebaseAuth.instance.currentUser!;
+  final totalNumberOfNuggets = topics[0].subTopics.length;
 
   var triviaTopicList = [
     'Statistics',
@@ -84,6 +93,7 @@ class _HomeState extends State<Home> {
     super.initState();
     rolePlaySelected = rolePlayList[0];
     verboseSelected = verboseList[1];
+    _firstloadedDateTime = DateTime.now();
   }
 
   void refreshTopic() {
@@ -105,10 +115,10 @@ class _HomeState extends State<Home> {
 
     setState(() {
       if (_currentSelectionToShow == 0) {
-        if (_currentNuggetItem <
-            topics[0].subTopics[_currentNuggetItem].length) {
+        if (_currentNuggetItem < totalNumberOfNuggets) {
           _currentNuggetItem++;
           logUserProgressData();
+          _firstloadedDateTime = DateTime.now();
         }
         _currentItem = "nugget";
       } else if (_currentSelectionToShow == 1) {
@@ -117,19 +127,19 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void goToChat() {
+/*   void goToChat() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ChatScreen()),
     );
-  }
+  } */
 
-  void goToSettings() {
+/*   void goToSettings() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => UserSettings()),
     );
-  }
+  } */
 
   void getThePreviousTopic() {
     _currentSelectionToShow = 0;
@@ -143,6 +153,7 @@ class _HomeState extends State<Home> {
         }
         _currentItem = "nugget";
         logUserProgressData();
+        _firstloadedDateTime = DateTime.now();
       } else if (_currentSelectionToShow == 1) {
         _currentItem = "trivia";
       }
@@ -151,11 +162,31 @@ class _HomeState extends State<Home> {
 
   Future<String> logUserProgressData() async {
     var returnValue = "No error";
+    _nextloadedDateTime = DateTime.now();
 
     final userProgressData = <String, dynamic>{
       "userId": currentlyLoggedInUser.uid,
       "currentNugget": _currentNuggetItem,
       'lastUpdatedOn': Timestamp.now(),
+    };
+
+    double timeSpentForLearningPoints = 0;
+
+    timeSpentForLearningPoints =
+        _nextloadedDateTime.difference(_firstloadedDateTime).inSeconds.abs() /
+            5;
+
+    final userProgressDetailData = <String, dynamic>{
+      "userId": currentlyLoggedInUser.uid,
+      "currentNugget": _currentNuggetItem,
+      "currentNuggetItem": topics[0].subTopics[_currentNuggetItem],
+      "startedAt": _firstloadedDateTime,
+      "finishedAt": _nextloadedDateTime,
+      "timeSpent":
+          _nextloadedDateTime.difference(_firstloadedDateTime).inSeconds.abs(),
+      "timeSpentForLearningPoints":
+          timeSpentForLearningPoints > 24 ? 24 : timeSpentForLearningPoints,
+      "type": "GuidedLearning"
     };
 
     await FirebaseFirestore.instance
@@ -164,6 +195,10 @@ class _HomeState extends State<Home> {
         .set(userProgressData)
         .then((value) => returnValue = "Data added successfully")
         .catchError((error) => returnValue = "Failed to add data: $error");
+
+    await FirebaseFirestore.instance
+        .collection('userProgressDetailData')
+        .add(userProgressDetailData);
 
     return (Future.value(returnValue).toString());
   }
@@ -498,103 +533,124 @@ class _HomeState extends State<Home> {
     final _heightOfScreen = MediaQuery.of(context).size.height;
 
     // TODO: implement build
-    return Center(
-      child: Container(
-        width: 500,
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Center(child: Text('Snailpace-ai Learning')),
-            actions: [
-              IconButton(
-                  onPressed: () {
-                    FirebaseAuth.instance.signOut();
-                  },
-                  icon: Icon(
-                    Icons.exit_to_app,
-                    color: Theme.of(context).colorScheme.primary,
-                  ))
-            ],
+    return
+/*     Center(
+      child:  */
+        Container(
+      width: 500,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Center(child: Text('Snailpace-ai Learning')),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              widget.goToWidget("Landing");
+              //Navigator.pop(context);
+
+/*                 Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => Landing())); */
+            },
           ),
-          drawer: CustomDrawer(),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          body: Center(
-            child: SizedBox(
-              height: _heightOfScreen, // 800,
-              width: 500, //_widthOfScreen,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          'assets/images/snailpace_logo_alt_2.png',
-                          height: 100,
-                        ),
-                        const SizedBox(
+          actions: [
+            IconButton(
+                onPressed: () {
+                  FirebaseAuth.instance.signOut();
+                  widget.goToWidget("AuthScreen");
+
+                  //Navigator.of(context, rootNavigator: true).pop(context);
+                  //Navigator.of(context).pop(context);
+                },
+                icon: Icon(
+                  Icons.exit_to_app,
+                  color: Theme.of(context).colorScheme.primary,
+                ))
+          ],
+        ),
+        //drawer: CustomDrawer(),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        body: Center(
+          child: SizedBox(
+            height: _heightOfScreen, // 800,
+            width: 500, //_widthOfScreen,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+/*                         const SizedBox(
                           width: 10,
                         ),
                         FloatingActionButton(
                           heroTag: "refreshTopic",
                           onPressed: refreshTopic,
                           child: const Icon(Icons.refresh),
-                        ),
-                        const SizedBox(
+                        ), */
+/*                         const SizedBox(
                           width: 10,
+                        ), */
+                      FloatingActionButton(
+                        heroTag: "getThePreviousTopic",
+                        onPressed: getThePreviousTopic,
+                        child: const Icon(Icons.skip_previous_rounded),
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      Image.asset(
+                        'assets/images/snailpace_logo_alt_2.png',
+                        height: 80,
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      FloatingActionButton(
+                        heroTag: "getTheNextTopic",
+                        onPressed: getTheNextTopic,
+                        child: const Icon(
+                          Icons.skip_next_rounded,
                         ),
-                        FloatingActionButton(
-                          heroTag: "getThePreviousTopic",
-                          onPressed: getThePreviousTopic,
-                          child: const Icon(Icons.skip_previous_rounded),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        FloatingActionButton(
-                          heroTag: "getTheNextTopic",
-                          onPressed: getTheNextTopic,
-                          child: const Icon(
-                            Icons.skip_next_rounded,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        FloatingActionButton(
+                      ),
+/*                         const SizedBox(
+                          width: 5,
+                        ), */
+/*                         FloatingActionButton(
                           heroTag: "goToSettings",
                           onPressed: goToSettings,
                           child: const Icon(
                             Icons.settings,
                           ),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        FloatingActionButton(
+                        ), */
+/*                         const SizedBox(
+                          width: 5,
+                        ), */
+/*                         FloatingActionButton(
                           heroTag: "goToChat",
                           onPressed: goToChat,
                           child: const Icon(
-                            Icons.chat_bubble,
+                            Icons.chat_sharp,
                           ),
-                        ),
-                      ],
-                    ),
-                    FutureBuilder(
-                      future: _currentSelectionToShow == 0
-                          ? getPromptCompletion()
-                          : (_currentSelectionToShow == 1
-                              ? getRandomTriviaOnAI()
-                              : getAssessment()),
-                      initialData:
-                          "Gemini API is working on the request, please wait",
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done &&
-                            !snapshot.hasError) {
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              /* Row(
+                        ), */
+                    ],
+                  ),
+                  FutureBuilder(
+                    future: _currentSelectionToShow == 0
+                        ? getPromptCompletion()
+                        : (_currentSelectionToShow == 1
+                            ? getRandomTriviaOnAI()
+                            : getAssessment()),
+                    initialData:
+                        "Gemini API is working on the request, please wait",
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done &&
+                          !snapshot.hasError) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            /* Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Image.asset(
@@ -640,43 +696,48 @@ class _HomeState extends State<Home> {
                                   ),
                                 ],
                               ), */
-                              if (_currentSelectionToShow <= 1)
-                                Nuggets(
-                                  titleData: _currentSelectionToShow == 0
-                                      ? topics[0].subTopics[_currentNuggetItem]
-                                      : "Random Trivia on A.I.",
-                                  descriptionData:
-                                      conceptArticulation, //snapshot.data!,
-                                  sources: allSources,
-                                  nuggetType: _currentItem,
-                                  userSelectedRole: rolePlaySelected,
-                                  userSelectedVerbosity: verboseSelected,
-                                ),
-                              if (_currentSelectionToShow == 2)
-                                QuizNuggets(
-                                  question:
-                                      "${jsonDataReturned["Question"].toString()}, choose the most appropriate option",
-                                  answerOptions: allOptions,
-                                  correctAnswer:
-                                      jsonDataReturned["Answer"].toString(),
-                                  reasoningForTheAnswer:
-                                      jsonDataReturned["Reasoning"].toString(),
-                                  onSelectAnswer: (question, choosenAnswer,
-                                      correctAnswer, reasoningForTheAnswer) {
-                                    eventOnSelectedAnswer(
-                                        question,
-                                        choosenAnswer,
-                                        correctAnswer,
-                                        reasoningForTheAnswer);
-                                  },
-                                ),
-                            ],
-                          );
-                        } else if (snapshot.hasError) {
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              /* Row(
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                "Nugget : ${_currentNuggetItem + 1} of $totalNumberOfNuggets",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 20),
+                              ),
+                            ),
+                            if (_currentSelectionToShow <= 1)
+                              Nuggets(
+                                titleData: _currentSelectionToShow == 0
+                                    ? topics[0].subTopics[_currentNuggetItem]
+                                    : "Random Trivia on A.I.",
+                                descriptionData:
+                                    conceptArticulation, //snapshot.data!,
+                                sources: allSources,
+                                nuggetType: _currentItem,
+                                userSelectedRole: rolePlaySelected,
+                                userSelectedVerbosity: verboseSelected,
+                              ),
+                            if (_currentSelectionToShow == 2)
+                              QuizNuggets(
+                                question:
+                                    "${jsonDataReturned["Question"].toString()}, choose the most appropriate option",
+                                answerOptions: allOptions,
+                                correctAnswer:
+                                    jsonDataReturned["Answer"].toString(),
+                                reasoningForTheAnswer:
+                                    jsonDataReturned["Reasoning"].toString(),
+                                onSelectAnswer: (question, choosenAnswer,
+                                    correctAnswer, reasoningForTheAnswer) {
+                                  eventOnSelectedAnswer(question, choosenAnswer,
+                                      correctAnswer, reasoningForTheAnswer);
+                                },
+                              ),
+                          ],
+                        );
+                      } else if (snapshot.hasError) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            /* Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Image.asset(
@@ -712,23 +773,23 @@ class _HomeState extends State<Home> {
                                   ),
                                 ],
                               ), */
-                              Nuggets(
-                                titleData:
-                                    topics[0].subTopics[_currentNuggetItem],
-                                descriptionData:
-                                    '''Error fetching data from Gemini API, ${snapshot.data}. There was an unexpected error. Please use one of the navigation buttons to either referesh or move forward.''',
-                                sources: [],
-                                userSelectedRole: "",
-                                userSelectedVerbosity: "",
-                                nuggetType: "error",
-                              ),
-                            ],
-                          );
-                        } else {
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              /* Row(
+                            Nuggets(
+                              titleData:
+                                  topics[0].subTopics[_currentNuggetItem],
+                              descriptionData:
+                                  '''Error fetching data from Gemini API, ${snapshot.data}. There was an unexpected error. Please use one of the navigation buttons to either referesh or move forward.''',
+                              sources: [],
+                              userSelectedRole: "",
+                              userSelectedVerbosity: "",
+                              nuggetType: "error",
+                            ),
+                          ],
+                        );
+                      } else {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            /* Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Image.asset(
@@ -764,29 +825,29 @@ class _HomeState extends State<Home> {
                                   ),
                                 ],
                               ), */
-                              Nuggets(
-                                titleData:
-                                    topics[0].subTopics[_currentNuggetItem],
-                                descriptionData:
-                                    "Gemini API is processing your request, please wait......",
-                                sources: [],
-                                nuggetType: "in-process",
-                                userSelectedRole: "",
-                                userSelectedVerbosity: "",
-                              ),
-                            ],
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                ),
+                            Nuggets(
+                              titleData:
+                                  topics[0].subTopics[_currentNuggetItem],
+                              descriptionData:
+                                  "Gemini API is processing your request, please wait......",
+                              sources: [],
+                              nuggetType: "in-process",
+                              userSelectedRole: "",
+                              userSelectedVerbosity: "",
+                            ),
+                          ],
+                        );
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
           ),
         ),
       ),
     );
+    //);
     // Row View
   }
 }

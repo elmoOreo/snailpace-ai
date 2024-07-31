@@ -52,6 +52,12 @@ dependencies:
   any_link_preview: ^3.0.2
   flutter_riverpod: ^2.5.1
   dropdown_search: ^5.0.6
+  syncfusion_flutter_gauges: ^26.2.5
+  percent_indicator: ^4.2.3
+  flutter_linkify: ^6.0.0
+  google_sign_in: ^6.2.1
+  google_sign_in_web: ^0.12.4+1
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +85,7 @@ flutter:
   assets:
      - assets/images/snailpace_logo_alt_1.png
      - assets/images/snailpace_logo_alt_2.png
+     - assets/images/googlelogo.png
      - randomfile.env
 
 
