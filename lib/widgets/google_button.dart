@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:snailpace/screens/master_screen.dart';
+//import 'package:snailpace/screens/master_screen.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
 final _firebase = FirebaseAuth.instance;
@@ -84,15 +84,7 @@ class _GoogleButtonState extends State<GoogleButton> {
           setState(() {
             _isProcessing = true;
           });
-          await signInWithGoogle().then((result) {
-/*             print('-----------------');
-            print(result);
-            print('-----------------'); */
-          }).catchError((error) {
-/*             print('-----------------');
-            print('Registration Error: $error');
-            print('-----------------'); */
-          });
+          await signInWithGoogle().then((result) {}).catchError((error) {});
           setState(() {
             _isProcessing = false;
           });

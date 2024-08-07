@@ -36,19 +36,19 @@ double degreeOfSimilarity = 0.0;
 
 typedef Future<T> FutureGenerator<T>();
 
-class Home extends StatefulWidget {
-  const Home({super.key, required this.goToWidget});
+class GuidedNavigation extends StatefulWidget {
+  const GuidedNavigation({super.key, required this.goToWidget});
 
   final void Function(String widgetName) goToWidget;
 
   @override
-  State<Home> createState() {
+  State<GuidedNavigation> createState() {
     // TODO: implement createState
-    return _HomeState();
+    return _GuidedNavigationState();
   }
 }
 
-class _HomeState extends State<Home> {
+class _GuidedNavigationState extends State<GuidedNavigation> {
   final currentlyLoggedInUser = FirebaseAuth.instance.currentUser!;
   final totalNumberOfNuggets = topics[0].subTopics.length;
 
@@ -101,15 +101,20 @@ class _HomeState extends State<Home> {
     rolePlaySelected = rolePlayList[0];
     verboseSelected = verboseList[1];
     _firstloadedDateTime = DateTime.now();
+    processInExecution = true;
+    _currentSelectionToShow = 0;
   }
 
   void refreshTopic() {
+    processInExecution = true;
+
     setState(() {
       _currentItem = "nugget";
     });
   }
 
   void getTheNextTopic() {
+    processInExecution = true;
     if (_currentSelectionToShow == 0) {
       _currentSelectionToShow = 1;
     } else if (_currentSelectionToShow == 1) {
@@ -139,6 +144,7 @@ class _HomeState extends State<Home> {
   }
 
   void getThePreviousTopic() {
+    processInExecution = true;
     _currentSelectionToShow = 0;
 
     setState(() {
@@ -232,77 +238,12 @@ class _HomeState extends State<Home> {
             choosenAnswer: choosenAnswer,
             correctAnswer: correctAnswer,
             degreeOfSimilarity: "",
-            reasoningForTheAnswer: reasoningForTheAnswer)
-        /* SingleChildScrollView(
-          child: SizedBox(
-            width: 500,
-            child: Column(
-              children: [
-                ColoredBox(
-                  color: Colors.lightBlueAccent,
-                  child: Text(
-                    'Question : $question',
-                    textAlign: TextAlign.left,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 2,
-                  indent: 0,
-                  endIndent: 0,
-                  color: Colors.black,
-                ),
-                Text(
-                  'Choosen Answer : $choosenAnswer',
-                  textAlign: TextAlign.left,
-                  style: const TextStyle(fontSize: 20),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 2,
-                  indent: 0,
-                  endIndent: 0,
-                  color: Colors.black,
-                ),
-                Text(
-                  'Correct Answer : $correctAnswer',
-                  textAlign: TextAlign.left,
-                  style: const TextStyle(fontSize: 20),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 2,
-                  indent: 0,
-                  endIndent: 0,
-                  color: Colors.black,
-                ),
-                ColoredBox(
-                  color: Colors.lightGreenAccent,
-                  child: Text(
-                    'Reasoning for the Answer : $reasoningForTheAnswer',
-                    textAlign: TextAlign.left,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                )
-              ],
-            ),
-          ),
-        ) */
-        ,
+            reasoningForTheAnswer: reasoningForTheAnswer),
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.pop(context, 'Cancel'),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'OK'),
+            onPressed: () {
+              Navigator.pop(context, 'OK');
+            },
             child: const Text('OK',
                 style: TextStyle(
                   fontSize: 20,
@@ -406,6 +347,9 @@ class _HomeState extends State<Home> {
     }
     allOptions.shuffle();
 
+    processInExecution = false;
+    setState(() {});
+
     return Future.value("Done");
   }
 
@@ -427,77 +371,14 @@ class _HomeState extends State<Home> {
             question: conceptBasedQuestion,
             choosenAnswer: answerSubmittedByTheUser,
             correctAnswer: answerToConceptBasedQuestion,
-            degreeOfSimilarity: degreeOfSimilarity.toString(),
+            degreeOfSimilarity:
+                '${(degreeOfSimilarity.toDouble() * 100).toString()} %',
             reasoningForTheAnswer: reasoningBehindTheConcept),
-        /* SingleChildScrollView(
-          child: SizedBox(
-            width: 500,
-            child: Column(
-              children: [
-                ColoredBox(
-                  color: Colors.lightBlueAccent,
-                  child: Text(
-                    'Question : $conceptBasedQuestion',
-                    textAlign: TextAlign.left,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 2,
-                  indent: 0,
-                  endIndent: 0,
-                  color: Colors.black,
-                ),
-                Text(
-                  'Choosen Answer : $answerSubmittedByTheUser',
-                  textAlign: TextAlign.left,
-                  style: const TextStyle(fontSize: 20),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 2,
-                  indent: 0,
-                  endIndent: 0,
-                  color: Colors.black,
-                ),
-                Text(
-                  'Correct Answer : $answerToConceptBasedQuestion',
-                  textAlign: TextAlign.left,
-                  style: const TextStyle(fontSize: 20),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 2,
-                  indent: 0,
-                  endIndent: 0,
-                  color: Colors.black,
-                ),
-                ColoredBox(
-                  color: Colors.lightGreenAccent,
-                  child: Text(
-                    'Reasoning for the Answer : $reasoningBehindTheConcept',
-                    textAlign: TextAlign.left,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                )
-              ],
-            ),
-          ),
-        ), */
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.pop(context, 'Cancel'),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'OK'),
+            onPressed: () {
+              Navigator.pop(context, 'OK');
+            },
             child: const Text('OK',
                 style: TextStyle(
                   fontSize: 20,
@@ -649,6 +530,9 @@ class _HomeState extends State<Home> {
     answerToConceptBasedQuestion =
         jsonDataReturned["answerToConceptBasedQuestion"];
 
+    processInExecution = false;
+    setState(() {});
+
     return Future.value("Done");
   }
 
@@ -711,6 +595,9 @@ class _HomeState extends State<Home> {
         outLoop++) {
       allSources.add(jsonDataReturned["Sources"][outLoop].toString().trim());
     }
+
+    processInExecution = false;
+    setState(() {});
 
     return Future.value("Done");
   }
@@ -802,12 +689,25 @@ class _HomeState extends State<Home> {
 
     _currentItem = "nugget";
 
+    processInExecution = false;
+    setState(() {});
+
     return Future.value("Done");
   }
 
   @override
   Widget build(BuildContext context) {
     final heightOfScreen = MediaQuery.of(context).size.height;
+
+    if (_currentSelectionToShow == 0 && processInExecution) {
+      getPromptCompletion();
+    } else if (_currentSelectionToShow == 1 && processInExecution) {
+      getRandomTriviaOnAI();
+    } else if (_currentSelectionToShow == 2 && processInExecution) {
+      getAssessment();
+    } else if (_currentSelectionToShow == 3 && processInExecution) {
+      getAssessmentOnConcept();
+    }
 
     // TODO: implement build
     return
@@ -882,141 +782,61 @@ class _HomeState extends State<Home> {
                       ),
                     ],
                   ),
-                  if (processInExecution)
-                    const CircularProgressIndicator(
-                      color: Colors.white,
-                      backgroundColor: Colors.amber,
-                    ),
-                  FutureBuilder(
-                    future: retry(
-                        2,
-                        _currentSelectionToShow == 0
-                            ? getPromptCompletion
-                            : (_currentSelectionToShow == 1
-                                ? getRandomTriviaOnAI
-                                : (_currentSelectionToShow == 2
-                                    ? getAssessment
-                                    : getAssessmentOnConcept)))
-/*                         _currentSelectionToShow == 0
-                        ? getPromptCompletion()
-                        : (_currentSelectionToShow == 1
-                            ? getRandomTriviaOnAI()
-                            : getAssessment()) */
-                    ,
-                    initialData:
-                        "Gemini API is working on the request, please wait",
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done &&
-                          !snapshot.hasError) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                "Nugget : ${_currentNuggetItem + 1} of $totalNumberOfNuggets",
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 20),
-                              ),
-                            ),
-                            if (_currentSelectionToShow <= 1)
-                              Nuggets(
-                                titleData: _currentSelectionToShow == 0
-                                    ? topics[0].subTopics[_currentNuggetItem]
-                                    : "Random Trivia on A.I.",
-                                descriptionData:
-                                    conceptArticulation, //snapshot.data!,
-                                sources: allSources,
-                                nuggetType: _currentItem,
-                                userSelectedRole: rolePlaySelected,
-                                userSelectedVerbosity: verboseSelected,
-                              ),
-                            if (_currentSelectionToShow == 2)
-                              if (jsonDataReturned != null)
-                                QuizNuggets(
-                                  question:
-                                      "${jsonDataReturned["Question"].toString()}, choose the most appropriate option",
-                                  answerOptions: allOptions,
-                                  correctAnswer:
-                                      jsonDataReturned["Answer"].toString(),
-                                  reasoningForTheAnswer:
-                                      jsonDataReturned["Reasoning"].toString(),
-                                  onSelectAnswer: (question, choosenAnswer,
-                                      correctAnswer, reasoningForTheAnswer) {
-                                    eventOnSelectedAnswer(
-                                        question,
-                                        choosenAnswer,
-                                        correctAnswer,
-                                        reasoningForTheAnswer);
-                                  },
-                                ),
-                            if (_currentSelectionToShow == 3)
-                              if (jsonDataReturned != null)
-                                QuizNuggetsNotes(
-                                    queryFromGemini: conceptBasedQuestion,
-                                    answerToQueryFromGemini:
-                                        answerToConceptBasedQuestion,
-                                    askSnailOnSubmission: (answerByUser,
-                                        answerToQueryFromGemini) {
-                                      setState(() {
-                                        processInExecution = true;
-                                      });
-                                      eventClickedToCheckAnswer(
-                                          conceptBasedQuestion,
-                                          answerToQueryFromGemini,
-                                          answerByUser);
-                                      setState(() {
-                                        processInExecution = false;
-                                      });
-                                    }),
-/*                             if (jsonDataReturned == null)
-                              Nuggets(
-                                titleData:
-                                    topics[0].subTopics[_currentNuggetItem],
-                                descriptionData:
-                                    '''Error fetching data from Gemini API, ${snapshot.data}. There was an unexpected error. Please use the referesh button.''',
-                                sources: [],
-                                userSelectedRole: "",
-                                userSelectedVerbosity: "",
-                                nuggetType: "error",
-                              ), */
-                          ],
-                        );
-                      } else if (snapshot.hasError) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Nuggets(
-                              titleData:
-                                  topics[0].subTopics[_currentNuggetItem],
-                              descriptionData:
-                                  '''Error fetching data from Gemini API, ${snapshot.data}. There was an unexpected error. Please use one of the  buttons to either referesh or move forward.''',
-                              sources: [],
-                              userSelectedRole: "",
-                              userSelectedVerbosity: "",
-                              nuggetType: "error",
-                            ),
-                          ],
-                        );
-                      } else {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Nuggets(
-                              titleData:
-                                  topics[0].subTopics[_currentNuggetItem],
-                              descriptionData:
-                                  "Gemini API is processing your request, please wait......",
-                              sources: [],
-                              nuggetType: "in-process",
-                              userSelectedRole: "",
-                              userSelectedVerbosity: "",
-                            ),
-                          ],
-                        );
-                      }
-                    },
+                  Text(
+                    "Nugget : ${_currentNuggetItem + 1} of $totalNumberOfNuggets",
+                    style: const TextStyle(color: Colors.white, fontSize: 20),
                   ),
+                  if (processInExecution)
+                    SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: const CircularProgressIndicator(
+                        color: Colors.white,
+                        backgroundColor: Colors.amber,
+                      ),
+                    ),
+                  if (processInExecution == false &&
+                      _currentSelectionToShow <= 1)
+                    Nuggets(
+                      titleData: _currentSelectionToShow == 0
+                          ? topics[0].subTopics[_currentNuggetItem]
+                          : "Random Trivia on A.I.",
+                      descriptionData: conceptArticulation, //snapshot.data!,
+                      sources: allSources,
+                      nuggetType: _currentItem,
+                      userSelectedRole: rolePlaySelected,
+                      userSelectedVerbosity: verboseSelected,
+                    ),
+                  if (processInExecution == false &&
+                      _currentSelectionToShow == 2)
+                    if (jsonDataReturned != null)
+                      QuizNuggets(
+                        question:
+                            "${jsonDataReturned["Question"].toString()}, choose the most appropriate option",
+                        answerOptions: allOptions,
+                        correctAnswer: jsonDataReturned["Answer"].toString(),
+                        reasoningForTheAnswer:
+                            jsonDataReturned["Reasoning"].toString(),
+                        onSelectAnswer: (question, choosenAnswer, correctAnswer,
+                            reasoningForTheAnswer) {
+                          eventOnSelectedAnswer(question, choosenAnswer,
+                              correctAnswer, reasoningForTheAnswer);
+                        },
+                      ),
+                  if (processInExecution == false &&
+                      _currentSelectionToShow == 3)
+                    if (jsonDataReturned != null)
+                      QuizNuggetsNotes(
+                          queryFromGemini: conceptBasedQuestion,
+                          answerToQueryFromGemini: answerToConceptBasedQuestion,
+                          askSnailOnSubmission:
+                              (answerByUser, answerToQueryFromGemini) {
+                            setState(() {
+                              processInExecution = true;
+                            });
+                            eventClickedToCheckAnswer(conceptBasedQuestion,
+                                answerToQueryFromGemini, answerByUser);
+                          }),
                 ],
               ),
             ),

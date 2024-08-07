@@ -51,7 +51,7 @@ class About extends StatelessWidget {
                   padding:
                       EdgeInsets.only(left: 20, right: 20, top: 5, bottom: 5),
                   child: Text(
-                    'Snailpace-AI is your pocket-sized professor. Learn complex topics on AI effortlessly with our AI-driven microlearning platform. Enjoy personalized content, interactive quizzes, and bite-sized summaries. Accelerate your knowledge with Snailpace-AI. Please drop a note to the email id for any clarification',
+                    'Snailpace-AI  2.1 is your pocket-sized professor. Learn complex topics on AI effortlessly with our AI-driven microlearning platform. Enjoy personalized content, interactive quizzes, and bite-sized summaries. Accelerate your knowledge with Snailpace-AI. Please drop a note to the email id for any clarification',
                     style: TextStyle(fontSize: 20, color: Colors.white),
                     softWrap: true,
                   ),

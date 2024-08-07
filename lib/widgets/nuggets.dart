@@ -110,7 +110,7 @@ class Nuggets extends StatelessWidget {
                 ),
                 if (nuggetType == "nugget")
                   const Text(
-                    "***Note*** You can change the style of narration, both role and length using the user settings on the top left corner. Hit the refresh button once you make the change.",
+                    "***Note*** You can change the style of narration, both role and length using the user settings.",
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
               ],

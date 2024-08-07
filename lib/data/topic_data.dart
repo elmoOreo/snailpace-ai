@@ -122,7 +122,7 @@ var topics = [
     'Multi Self Attention Head',
     'KL Divergence',
     'Transformer Architecture',
-    'Ecnoder in Transformer Architecture',
+    'Encoder in Transformer Architecture',
     'Decoder in Transformer Architecture'
   ])
 ];

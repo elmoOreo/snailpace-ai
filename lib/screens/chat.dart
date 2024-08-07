@@ -1,4 +1,3 @@
-//import 'package:dropdown_search/dropdown_search.dart';
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,18 +9,15 @@ import 'package:snailpace/data/roleplay_data.dart';
 
 import 'package:snailpace/data/topic_data.dart';
 import 'package:snailpace/data/verbose_data.dart';
-import 'package:snailpace/screens/landing.dart';
 import 'package:snailpace/widgets/chat_filter.dart';
 import 'package:snailpace/widgets/chat_nuggets.dart';
-/* import 'package:string_validator/string_validator.dart';
-import 'package:url_launcher/url_launcher.dart'; */
 
 var _firstloadedDateTime = DateTime.now();
 var _nextloadedDateTime = DateTime.now();
 String _selectedTopicForDiscussion = "";
 
 class ChatScreen extends StatefulWidget {
-  ChatScreen({super.key, required this.goToWidget});
+  const ChatScreen({super.key, required this.goToWidget});
 
   final void Function(String widgetName) goToWidget;
 
@@ -229,21 +225,7 @@ class _ChatScreenState extends State<ChatScreen> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              // Navigate back to the previous screen by popping the current route
-              //Navigator.pop(context);
-
               widget.goToWidget("Landing");
-
-              //Navigator.of(context).popUntil((route) => route.isFirst);
-/* 
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (BuildContext context) => Landing())); */
-/*                 Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Landing()),
-                ); */
             },
           ),
           actions: [
@@ -284,86 +266,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       setState(() {});
                       askSnail(queryFromUser);
                     }),
-                /* SizedBox(
-                  height: 10,
-                ),
-                SizedBox(
-                  width: 500,
-                  child: Row(
-                    children: [
-                      Image.asset(
-                        'assets/images/snailpace_logo_alt_2.png',
-                        height: 100,
-                      ),
-                      DropdownMenu<String>(
-                        enableFilter: true,
-                        enableSearch: true,
-                        leadingIcon: const Icon(Icons.search),
-                        inputDecorationTheme: const InputDecorationTheme(
-                          filled: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 5.0),
-                        ),
-                        controller: itemController,
-                        requestFocusOnTap: true,
-                        label: const Text('Select a topic for chat'),
-                        onSelected: (item) {
-                          processInExecution = true;
-                          selectedTopicForDiscussion = item;
-                          getInitialCompletion(item!);
-                        },
-                        dropdownMenuEntries: topics[0]
-                            .subTopics
-                            .map<DropdownMenuEntry<String>>((String item) {
-                          return DropdownMenuEntry<String>(
-                            value: item,
-                            label: item,
-                            style: MenuItemButton.styleFrom(
-                              foregroundColor: Colors.black,
-                            ),
-                          );
-                        }).toList(),
-                      )
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                SizedBox(
-                  width: 500,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          style: const TextStyle(color: Colors.white),
-                          maxLines: 3,
-                          controller: queryFromUser,
-                          decoration: const InputDecoration(
-                            focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.white, width: 0.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.white, width: 0.0),
-                            ),
-                            labelText: 'AskSnail',
-                            labelStyle: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                          onPressed: () {
-                            processInExecution = true;
-                            askSnail(queryFromUser.text);
-                          },
-                          icon: const Icon(
-                            Icons.send,
-                            color: Colors.white,
-                          ))
-                    ],
-                  ),
-                ), */
                 if (processInExecution)
                   const SizedBox(
                     height: 100,
@@ -379,88 +281,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       userChatShowList: userChatShowList,
                       modelChatShowList: modelChatShowList,
                       modelChatSourceList: modelChatSourceList),
-                /* SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          ...userChatShowList.map((item) {
-                            dataCount--;
-                            linkCount = 0;
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                SizedBox(
-                                  width: 500,
-                                  child: Row(
-                                    children: [
-                                      Card(
-                                          elevation: 50,
-                                          shadowColor: Colors.black,
-                                          color: Colors.amberAccent[100],
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(15.0),
-                                            child: Text(
-                                              userChatShowList[dataCount],
-                                              style: TextStyle(fontSize: 15),
-                                            ),
-                                          )),
-                                      const Expanded(
-                                        child: SizedBox(
-                                          width: 50,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 500,
-                                  child: Card(
-                                      elevation: 50,
-                                      shadowColor: Colors.black,
-                                      color: Colors.greenAccent[200],
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(15.0),
-                                        child: Text(
-                                            modelChatShowList[dataCount],
-                                            style: TextStyle(fontSize: 15)),
-                                      )),
-                                ),
-                                ...modelChatSourceList[dataCount].map((item) {
-                                  linkCount++;
-                                  return SizedBox(
-                                    width: 500,
-                                    child: Card(
-                                      elevation: 50,
-                                      shadowColor: Colors.black,
-                                      color: Colors.greenAccent[300],
-                                      child: InkWell(
-                                        onTap: () => isURL(item)
-                                            ? launchUrl(Uri.parse(item))
-                                            : () {},
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(15.0),
-                                          child: Text(
-                                            isURL(item)
-                                                ? "Source Link $linkCount : : $item"
-                                                : item,
-                                            textAlign: TextAlign.left,
-                                            style: const TextStyle(
-                                              decoration:
-                                                  TextDecoration.underline,
-                                              color: Colors.black,
-                                              fontSize: 15,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                })
-                              ],
-                            );
-                          })
-                        ],
-                      ),
-                    ), */
               ],
             ),
           ),

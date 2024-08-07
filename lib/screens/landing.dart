@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:snailpace/data/roleplay_data.dart';
 import 'package:snailpace/data/verbose_data.dart';
 import 'package:snailpace/screens/about.dart';
-import 'package:snailpace/screens/auth.dart';
-import 'package:snailpace/screens/chat.dart';
-import 'package:snailpace/screens/home.dart';
+
 import 'package:snailpace/screens/privacy.dart';
-import 'package:snailpace/screens/user_settings.dart';
+
 //import 'package:snailpace/widgets/custom_drawer.dart';
 import 'package:snailpace/widgets/landing_options.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
@@ -37,6 +35,7 @@ class _LandingState extends State<Landing> {
   Future<void> getUserStats() async {
     var totalRightAnswersScore = 0;
     double totalTimeSpentScore = 0;
+    double totalAssessmentPoints = 0;
 
     await FirebaseFirestore.instance
         .collection("quizData")
@@ -72,8 +71,21 @@ class _LandingState extends State<Landing> {
           onError: (e) => totalTimeSpentScore = 0,
         );
 
-    myAIIQScore =
-        baseScore + totalRightAnswersScore.toDouble() + totalTimeSpentScore;
+    await FirebaseFirestore.instance
+        .collection("assessmentData")
+        .where('userId', isEqualTo: currentlyLoggedInUser.uid)
+        .aggregate(sum('correctAnswers'))
+        .get()
+        .then(
+          (AggregateQuerySnapshot aggregateSnapshot) => totalAssessmentPoints =
+              aggregateSnapshot.getSum('correctAnswers')!.toDouble(),
+          onError: (e) => totalAssessmentPoints = 0,
+        );
+
+    myAIIQScore = baseScore +
+        totalRightAnswersScore.toDouble() +
+        totalTimeSpentScore +
+        totalAssessmentPoints;
   }
 
   Future<String> getUserSettings() async {
@@ -105,24 +117,12 @@ class _LandingState extends State<Landing> {
     void onClick(String blockTitle) {
       if (blockTitle == "User Settings") {
         widget.goToWidget(blockTitle);
-
-/*         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => UserSettings()),
-        ); */
       } else if (blockTitle == "Guided Learning") {
         widget.goToWidget(blockTitle);
-/*         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const Home()),
-        ); */
       } else if (blockTitle == "Chat on Topic") {
         widget.goToWidget(blockTitle);
-
-/*         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ChatScreen()),
-        ); */
+      } else if (blockTitle == "Assessments") {
+        widget.goToWidget(blockTitle);
       } else if (blockTitle == "About") {
         Navigator.push(
           context,
@@ -200,24 +200,42 @@ class _LandingState extends State<Landing> {
                                   axes: <RadialAxis>[
                                     RadialAxis(
                                         minimum: 0,
-                                        maximum: 2250,
+                                        maximum: 9000,
                                         ranges: <GaugeRange>[
                                           GaugeRange(
                                               startValue: 0,
                                               endValue: 1500,
-                                              color: Colors.green,
+                                              color: Colors.pink,
                                               startWidth: 10,
                                               endWidth: 10),
                                           GaugeRange(
                                               startValue: 1500,
                                               endValue: 3000,
-                                              color: Colors.orange,
+                                              color: Colors.black,
                                               startWidth: 10,
                                               endWidth: 10),
                                           GaugeRange(
                                               startValue: 3000,
-                                              endValue: 5000,
+                                              endValue: 4500,
                                               color: Colors.red,
+                                              startWidth: 10,
+                                              endWidth: 10),
+                                          GaugeRange(
+                                              startValue: 4500,
+                                              endValue: 6000,
+                                              color: Colors.blue,
+                                              startWidth: 10,
+                                              endWidth: 10),
+                                          GaugeRange(
+                                              startValue: 6000,
+                                              endValue: 7500,
+                                              color: Colors.amber,
+                                              startWidth: 10,
+                                              endWidth: 10),
+                                          GaugeRange(
+                                              startValue: 7500,
+                                              endValue: 9000,
+                                              color: Colors.green,
                                               startWidth: 10,
                                               endWidth: 10)
                                         ],
@@ -334,6 +352,13 @@ class _LandingState extends State<Landing> {
                         },
                       ),
                       LandingOptions(
+                          blockTitle: "Privacy",
+                          blockColor: Colors.lightGreenAccent,
+                          iconClass: Icons.privacy_tip_sharp,
+                          onBlockTap: () {
+                            onClick("Privacy");
+                          }),
+                      LandingOptions(
                         blockTitle: "Guided Learning",
                         blockColor: Colors.redAccent,
                         iconClass: Icons.directions_sharp,
@@ -349,11 +374,11 @@ class _LandingState extends State<Landing> {
                             onClick("Chat on Topic");
                           }),
                       LandingOptions(
-                          blockTitle: "Privacy",
-                          blockColor: Colors.lightGreenAccent,
-                          iconClass: Icons.privacy_tip_sharp,
+                          blockTitle: "Assessments",
+                          blockColor: const Color.fromARGB(255, 182, 225, 134),
+                          iconClass: Icons.question_mark_sharp,
                           onBlockTap: () {
-                            onClick("Privacy");
+                            onClick("Assessments");
                           }),
                     ],
                   ),

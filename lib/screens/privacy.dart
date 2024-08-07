@@ -30,6 +30,7 @@ class Privacy extends StatelessWidget {
           backgroundColor: Theme.of(context).colorScheme.primary,
           body: SingleChildScrollView(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
                   margin: const EdgeInsets.only(
