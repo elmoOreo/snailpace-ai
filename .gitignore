@@ -43,3 +43,9 @@ app.*.map.json
 /android/app/release
 
 # environment files
+*.env
+
+# firebase files
+.firebaserc
+firebase.json
+.firebase/

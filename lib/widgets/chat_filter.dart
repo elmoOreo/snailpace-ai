@@ -110,7 +110,13 @@ class _ChatFilterState extends State<ChatFilter> {
               ),
               IconButton(
                   onPressed: () {
-                    widget.askSnail(queryFromUser.text);
+                    String askSnailText = "";
+                    if (_topicSelected &&
+                        queryFromUser.text.trim().isNotEmpty) {
+                      askSnailText = queryFromUser.text;
+                      queryFromUser.text = "";
+                      widget.askSnail(askSnailText);
+                    }
                   },
                   icon: const Icon(
                     Icons.send,

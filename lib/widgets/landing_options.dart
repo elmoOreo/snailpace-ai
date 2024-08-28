@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LandingOptions extends StatelessWidget {
   LandingOptions(
@@ -45,10 +47,12 @@ class LandingOptions extends StatelessWidget {
                   Text(
                 blockTitle,
                 softWrap: true,
-                style: TextStyle(
+                style: GoogleFonts.robotoSlab(
+                    textStyle: TextStyle(color: Colors.white, fontSize: 15)),
+/*                 style: TextStyle(
                   fontSize: 15,
                   color: Colors.white,
-                ),
+                ), */
               ),
 //              ),
             ),

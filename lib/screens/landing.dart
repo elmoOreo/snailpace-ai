@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:snailpace/data/roleplay_data.dart';
 import 'package:snailpace/data/verbose_data.dart';
 import 'package:snailpace/screens/about.dart';
@@ -29,6 +30,18 @@ class Landing extends StatefulWidget {
 class _LandingState extends State<Landing> {
   var _userSelectedRolePlay;
   var _userSelectedVerbose;
+
+  @override
+  void deactivate() {
+    // TODO: implement deactivate
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
 
   final currentlyLoggedInUser = FirebaseAuth.instance.currentUser!;
 
@@ -193,87 +206,91 @@ class _LandingState extends State<Landing> {
                             Expanded(
                               child: SfRadialGauge(
                                   title: GaugeTitle(
-                                      text: 'Your AiIQ Score',
-                                      textStyle: const TextStyle(
-                                          fontSize: 20.0,
-                                          fontWeight: FontWeight.bold)),
+                                    text: 'Your w-AiIQ Score',
+                                    textStyle: GoogleFonts.robotoSlab(
+                                      textStyle: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
                                   axes: <RadialAxis>[
                                     RadialAxis(
                                         minimum: 0,
-                                        maximum: 9000,
+                                        maximum: 100,
                                         ranges: <GaugeRange>[
                                           GaugeRange(
                                               startValue: 0,
-                                              endValue: 1500,
+                                              endValue: 15, //1500,
                                               color: Colors.pink,
                                               startWidth: 10,
                                               endWidth: 10),
                                           GaugeRange(
-                                              startValue: 1500,
-                                              endValue: 3000,
+                                              startValue: 15, //1500,
+                                              endValue: 30, //3000,
                                               color: Colors.black,
                                               startWidth: 10,
                                               endWidth: 10),
                                           GaugeRange(
-                                              startValue: 3000,
-                                              endValue: 4500,
+                                              startValue: 30, //3000,
+                                              endValue: 45, //4500,
                                               color: Colors.red,
                                               startWidth: 10,
                                               endWidth: 10),
                                           GaugeRange(
-                                              startValue: 4500,
-                                              endValue: 6000,
+                                              startValue: 45, //4500,
+                                              endValue: 60, //6000,
                                               color: Colors.blue,
                                               startWidth: 10,
                                               endWidth: 10),
                                           GaugeRange(
-                                              startValue: 6000,
-                                              endValue: 7500,
+                                              startValue: 60, //6000,
+                                              endValue: 75, //7500,
                                               color: Colors.amber,
                                               startWidth: 10,
                                               endWidth: 10),
                                           GaugeRange(
-                                              startValue: 7500,
-                                              endValue: 9000,
+                                              startValue: 75, //7500,
+                                              endValue: 100, //9000,
                                               color: Colors.green,
                                               startWidth: 10,
                                               endWidth: 10)
                                         ],
                                         pointers: <GaugePointer>[
-                                          NeedlePointer(value: myAIIQScore)
+                                          NeedlePointer(
+                                              value: ((myAIIQScore *
+                                                  (100 / 10000))))
                                         ],
                                         annotations: <GaugeAnnotation>[
                                           GaugeAnnotation(
                                               widget: Container(
-                                                  child: Text("$myAIIQScore",
-                                                      style: TextStyle(
-                                                          fontSize: 15,
-                                                          fontWeight: FontWeight
-                                                              .bold))),
+                                                  child: Text(
+                                                      "$myAIIQScore\npoints",
+                                                      style: GoogleFonts
+                                                          .robotoSlab(
+                                                        textStyle: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize: 15),
+                                                      ))),
                                               angle: 90,
                                               positionFactor: 0.5)
                                         ])
                                   ]),
                             ),
-                            const Text(
+                            Text(
                               'My current configured settings',
-                              style:
-                                  TextStyle(fontSize: 20, color: Colors.black),
+                              style: GoogleFonts.robotoSlab(
+                                  textStyle: TextStyle(
+                                      color: Colors.black, fontSize: 20)),
                             ),
                             Text(
                               "Explain any concept ASSUMING I am $_userSelectedRolePlay in $_userSelectedVerbose, Change your settings through User Settings",
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 15),
+                              style: GoogleFonts.robotoSlab(
+                                  textStyle: TextStyle(
+                                      color: Colors.black, fontSize: 15)),
+                              //TextStyle(color: Colors.black, fontSize: 15),
                               softWrap: true,
                             ),
-/*                             const SizedBox(
-                              height: 5,
-                            ),
-                            const Text(
-                              'Your AiIQ',
-                              style:
-                                  TextStyle(fontSize: 20, color: Colors.black),
-                            ), */
                           ],
                         );
                       } else if (snapshot.hasError) {
@@ -282,29 +299,35 @@ class _LandingState extends State<Landing> {
                             const SizedBox(
                               height: 10,
                             ),
-                            const Text(
+                            Text(
                               'My current configured settings',
-                              style:
-                                  TextStyle(fontSize: 20, color: Colors.black),
+                              style: GoogleFonts.robotoSlab(
+                                  textStyle: TextStyle(
+                                      color: Colors.black, fontSize: 15)),
+                              //TextStyle(fontSize: 20, color: Colors.black),
                             ),
                             const SizedBox(
                               height: 10,
                             ),
                             Text(
                               "Explain any concept ASSUMING I am $_userSelectedRolePlay in $_userSelectedVerbose, Change your settings through User Settings",
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 15),
+                              style: GoogleFonts.robotoSlab(
+                                  textStyle: TextStyle(
+                                      color: Colors.black, fontSize: 15)),
+                              //TextStyle(color: Colors.black, fontSize: 15),
                               softWrap: true,
                             ),
                           ],
                         );
                       } else {
-                        return const Column(
+                        return Column(
                           children: [
                             Text(
                               'Loading Your settings from database...',
-                              style:
-                                  TextStyle(fontSize: 20, color: Colors.white),
+                              style: GoogleFonts.robotoSlab(
+                                  textStyle: TextStyle(
+                                      color: Colors.white, fontSize: 20)),
+                              //TextStyle(fontSize: 20, color: Colors.white),
                               softWrap: true,
                             ),
                             SizedBox(
