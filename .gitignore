@@ -59,4 +59,4 @@ app.*.map.json
 .firebaserc
 firebase.json
 .firebase/
-firebase_options.dart
+/lib/firebase_options.dart
