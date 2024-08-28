@@ -1,16 +1,11 @@
 # snailpace
 
-A new Flutter project.
+Snailpace-AI  2.1 is your pocket-sized professor. Learn complex topics on AI effortlessly with our AI-driven microlearning platform. Enjoy personalized content, interactive quizzes, and bite-sized summaries. Accelerate your knowledge with Snailpace-AI. Please drop a note to the email id for any clarification
 
-## Getting Started
+## Vision
 
-This project is a starting point for a Flutter application.
+Democratize knowledge by making learning accessible, engaging, and efficient for everyone, anytime, anywhere.
 
-A few resources to get you started if this is your first Flutter project:
+## Mission
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Deliver personalized, engaging learning experiences that empower individuals to acquire new knowledge efficiently and effectively.
